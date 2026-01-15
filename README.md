@@ -5,7 +5,9 @@
 ## 1 Resume of the methodology:
 This article proposes a diffusion-based reconstruction technique for image restoration. This method relies on iterative estimation of the undegraded image $\hat{\mathbf{x}}_0$, obtained by combining two sources of information. First, a pre-trained UNet network, capable of generating realistic images, provides prior information. Second, the approach considers the likelihood of the data, determined by an image degradation model with a known direct measurement operator. Combining these pieces of information enables progressive improvement in the quality of the reconstructed image.
 
-In summary, we are looking for the most probable images $x_{0}$ sampled according to the posterior distribution: $p_t(x_t|y) = \frac{p_t(x_t)p_t(y|x_t)}{p_t(y)}$.
+In summary, we are looking for the most probable images $x_{0}$ sampled according to the posterior distribution: 
+
+$p_t(x_t|y) = \frac{p_t(x_t)p_t(y|x_t)}{p_t(y)}$.
 
 ## 2 Prerequisites
 - python 3.8
