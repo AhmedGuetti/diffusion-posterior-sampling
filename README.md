@@ -86,15 +86,6 @@ In order to process non-linear deblurring, it is necessary to make certain modif
 - bkse/options/generate_blur/default.yml
 The corrected versions of the code can be found in the folder named fix.
 
-### 4.2) Applied to Ultrasound Images
-```
-python3 main.py \
---model_config configs/model_config.yaml \
---diffusion_config configs/diffusion_config.yaml \
---task_config configs/ultrasound_config.yaml
-```
-Here, we adapted the approach to handle ultrasound pictures using the forward measurement model and an estimated psf.
-
 #### Structure of task configurations
 You need to write your data directory at data.root. Default is ./data/samples which contains three sample images from FFHQ validation set.
 
@@ -117,6 +108,15 @@ noise:
     sigma:  # if you use name: gaussian, set this.
     (rate:) # if you use name: poisson, set this.
 ```
+### 4.2) Applied to Ultrasound Images
+```
+python3 main.py \
+--model_config configs/model_config.yaml \
+--diffusion_config configs/diffusion_config.yaml \
+--task_config configs/ultrasound_config.yaml
+```
+Here, we adapted the approach to handle ultrasound images using the forward measurement model and an estimated psf.
+
 ## 5 Test Results in Photographic Images:
 ### Super-resolution Task
 <p align="center">
