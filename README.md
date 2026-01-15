@@ -1,43 +1,30 @@
-# Diffusion Posterior Sampling for General Noisy Inverse Problems (ICLR 2023 spotlight)
+# Technical project based on the paper:  [Diffusion Posterior Sampling for General Noisy Inverse Problems (ICLR 2023 spotlight)][arxiv-paper]
+[arxiv-paper]: https://arxiv.org/abs/2503.10237
 
-![result-gif1](./figures/motion_blur.gif)
-![result-git2](./figures/super_resolution.gif)
-<!-- See more results in the [project-page](https://jeongsol-kim.github.io/dps-project-page) -->
+<strong>By:</strong> Alexandra Villon Huaman & Ahmed Guetti (Université de Toulouse, France)
+## 1 Resume of the methodology:
+This article proposes a diffusion-based reconstruction technique for image restoration. This method relies on iterative estimation of the undegraded image $\hat{\mathbf{x}}_0$, obtained by combining two sources of information. First, a pre-trained UNet network, capable of generating realistic images, provides prior information. Second, the approach considers the likelihood of the data, determined by an image degradation model with a known direct measurement operator. Combining these pieces of information enables progressive improvement in the quality of the reconstructed image.
 
-## Abstract
-In this work, we extend diffusion solvers to efficiently handle general noisy (non)linear inverse problems via the approximation of the posterior sampling. Interestingly, the resulting posterior sampling scheme is a blended version of the diffusion sampling with the manifold constrained gradient without strict measurement consistency projection step, yielding more desirable generative path in noisy settings compared to the previous studies.
+In summary, we are looking for the most probable images $x_{0}$ sampled according to the posterior distribution: $p_t(x_t|y) = \frac{p_t(x_t)p_t(y|x_t)}{p_t(y)}$.
 
-![cover-img](./figures/cover.jpg)
-
-
-## Prerequisites
+## 2 Prerequisites
 - python 3.8
-
 - pytorch 1.11.0
-
 - CUDA 11.3.1
+- nvidia-docker (if you use a GPU in docker container)
 
-- nvidia-docker (if you use GPU in docker container)
-
-It is okay to use lower version of CUDA with proper pytorch version.
-
+According the autor, you can use lower version of CUDA with proper pytorch version.
 Ex) CUDA 10.2 with pytorch 1.7.0
 
-<br />
+## 3 How to Run the Code:
 
-## Getting started 
-
-### 1) Clone the repository
+### A) Clone the repository
 
 ```
-git clone https://github.com/DPS2022/diffusion-posterior-sampling
-
+git clone git@github.com:AhmedGuetti/diffusion-posterior-sampling.git
 cd diffusion-posterior-sampling
 ```
-
-<br />
-
-### 2) Download pretrained checkpoint
+### B) Download pretrained checkpoint
 From the [link](https://drive.google.com/drive/folders/1jElnRoFv7b31fG0v6pTSQkelbSX3xGZh?usp=sharing), download the checkpoint "ffhq_10m.pt" and paste it to ./models/
 ```
 mkdir models
@@ -45,13 +32,9 @@ mv {DOWNLOAD_DIR}/ffqh_10m.pt ./models/
 ```
 {DOWNLOAD_DIR} is the directory that you downloaded checkpoint to.
 
-:speaker: Checkpoint for imagenet is uploaded.
+### C) Environnement Setup:
 
-<br />
-
-
-### 3) Set environment
-### [Option 1] Local environment setting
+### Local environment setting
 
 We use the external codes for motion-blurring and non-linear deblurring.
 
@@ -72,26 +55,8 @@ pip install -r requirements.txt
 
 pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
 ```
-
-<br />
-
-### [Option 2] Build Docker image
-
-Install docker engine, GPU driver and proper cuda before running the following commands.
-
-Dockerfile already contains command to clone external codes. You don't have to clone them again.
-
---gpus=all is required to use local GPU device (Docker >= 19.03)
-
-```
-docker build -t dps-docker:latest .
-
-docker run -it --rm --gpus=all dps-docker
-```
-
-<br />
-
-### 4) Inference
+## 4) Inference 
+### 4.1) Applied to Photographic images
 
 ```
 python3 sample_condition.py \
@@ -99,13 +64,7 @@ python3 sample_condition.py \
 --diffusion_config=configs/diffusion_config.yaml \
 --task_config={TASK-CONFIG};
 ```
-
-
-:speaker: For imagenet, use configs/imagenet_model_config.yaml
-
-<br />
-
-## Possible task configurations
+#### a. Possible task configurations
 
 ```
 # Linear inverse problems
@@ -118,8 +77,23 @@ python3 sample_condition.py \
 - configs/nonlinear_deblur_config.yaml
 - configs/phase_retrieval_config.yaml
 ```
+#### b. Fixing some issues 
+In order to process non-linear deblurring, it is necessary to make certain modifications to the following relative paths: 
+- bkse/models/backbones/resnet.py
+- bkse/models/kernel_encoding/kernel_wizard.py
+- bkse/options/generate_blur/default.yml
+The corrected versions of the code can be found in the folder named fix.
 
-### Structure of task configurations
+### 4.2) Applied to Ultrasound Images
+```
+python3 main.py \
+--model_config configs/model_config.yaml \
+--diffusion_config configs/diffusion_config.yaml \
+--task_config configs/ultrasound_config.yaml
+```
+Here, we adapted the approach to handle ultrasound pictures using the forward measurement model and an estimated psf.
+
+#### Structure of task configurations
 You need to write your data directory at data.root. Default is ./data/samples which contains three sample images from FFHQ validation set.
 
 ```
@@ -141,9 +115,45 @@ noise:
     sigma:  # if you use name: gaussian, set this.
     (rate:) # if you use name: poisson, set this.
 ```
+## 5 Test Results in Photographic Images:
+### Super-resolution Task
+<p align="center">
+  <img width="607" height="605" alt="image" src="https://github.com/user-attachments/assets/ade5c6d8-e299-43ed-95bf-d1d62cf368ba" /> 
+<br>
+  From left to right: input image, reconstructed image, ideal image.
+</p>
+
+### Gaussian Deblurring Task
+<p align="center">
+ <img width="730" height="734" alt="image" src="https://github.com/user-attachments/assets/202f1352-52bd-40fd-a20e-fc3656b8a68f" />
+ <br>
+  From left to right: input image, reconstructed image, ideal image.
+</p>
+
+### Phase Retrieval Task
+<p align="center">
+<img width="602" height="605" alt="image" src="https://github.com/user-attachments/assets/3366cf2f-c66f-4d84-92ba-eb12de6ecc69" />
+<br>
+  From left to right: input image, reconstructed image, ideal image.
+</p>
+
+## 6 Test Results in Ultrasound Images
+### Simulated images
+<p align="center">
+<img width="856" height="435" alt="image" src="https://github.com/user-attachments/assets/eb97e041-bc84-4cf6-94c4-3569e808edee" />
+<br>
+  From left to right: input image, reconstructed image, ideal image.
+</p>
+
+### In vivo images
+<p align="center">
+<img width="853" height="382" alt="image" src="https://github.com/user-attachments/assets/b9bb627b-58d8-452c-945d-02dbcbaf1637" />
+
+<br>
+  From left to right: input image, reconstructed image, ideal image.
+</p>
 
 ## Citation
-If you find our work interesting, please consider citing
 
 ```
 @inproceedings{
