@@ -1,0 +1,15 @@
+conditioning:
+  method: ps
+  params:
+    scale: 0.3     
+
+data:
+  root: ./data/US_data/simu/1
+
+measurement:
+  operator:
+    name: ultrasound_psf
+    psf_path: ./data/US_data/simu/1/psf_est.mat
+  noise:
+    name: gaussian
+    sigma: 0.05
